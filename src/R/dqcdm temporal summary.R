@@ -45,9 +45,7 @@ for(conceptId in  concepts[,1])
     plot(ts)
     lines(ts(fit2$coef[1]+fit2$coef[2]*(1:n)+mean(fit2$coef[-(1:2)]),
              start=start(ts),f=12),col="red")
-    
-    ?tsoutliers
-    
+
     tsoutliers(ts)
     
     #data quality checks
