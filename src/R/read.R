@@ -9,6 +9,7 @@ dat <- fread("../../data/dqcdm-temporal-summary/dqcdm_temporal_summary_subset_2.
 dat[ , prevalence := as.double(prevalence)]
 dat[ , time_period := paste0(time_period, "01")]
 dat[ , time_period := ymd(time_period)]
+dat[ , month := month(time_period)]
 
 
 # Exploratory data analysis.  

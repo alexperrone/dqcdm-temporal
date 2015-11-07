@@ -7,7 +7,6 @@
 summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
                       conf.interval=.95, .drop=TRUE) {
   library(plyr)
-  
   # New version of length which can handle NA's: if na.rm==T, don't count them
   length2 <- function (x, na.rm=FALSE) {
     if (na.rm) sum(!is.na(x))
@@ -27,7 +26,9 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   )
   
   # Rename the "mean" column    
-  datac <- rename(datac, c("mean" = measurevar))
+  # datac <- rename(datac, c("mean" = measurevar))  # original: doesn't work
+  datac <- data.table(datac)
+  setnames(datac, "mean", measurevar)
   
   datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
   
@@ -39,3 +40,10 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   
   return(datac)
 }
+
+# Theme for ggplot2. 
+theme_alex <- theme(text=element_text(size=14, colour="black"), 
+                    axis.text=element_text(size=14, colour="black"), 
+                    axis.title=element_text(size=14, colour="black"),
+                    legend.title=element_text(size=14, colour="black"), 
+                    legend.text=element_text(size=14, colour="black"))

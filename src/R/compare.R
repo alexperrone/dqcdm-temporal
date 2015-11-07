@@ -10,18 +10,17 @@ library("testthat")
 compareYearCondition <- function(dat, sn, year, cid){
   # Subset to the database, year, and concept_id. 
   dat <- copy(dat)  # do not modify the original dat
-  dat[ , month := month(time_period)]
   dat_year <- subset(dat, source_name==sn & 
                        year(time_period)==year &
                        concept_id==cid)
   dat_control <- subset(dat, source_name==sn & 
                           year(time_period) != year &
                           concept_id==cid)
-  dat_control[ , .(mean(prevalence)), by=.(month(time_period))]
   dat_control_mean <- summarySE(dat_control, measurevar="prevalence", groupvars="month") %>% 
     data.table()
   dat_control_mean[ , upper := prevalence + se]
   dat_control_mean[ , lower := prevalence - se]
+  browser()
   return(list(dat_year=dat_year, dat_control_mean=dat_control_mean))
 }
 
@@ -44,6 +43,7 @@ plotComparison <- function(res){
     geom_line(data=res, aes(x=month, y=prevalence_control)) + 
     geom_line(data=res, aes(x=month, y=prevalence_control + upper), linetype=9) +
     geom_line(data=res, aes(x=month, y=prevalence_control - lower), linetype=9)
+  browser()
   return(g)
 }
 
@@ -67,4 +67,8 @@ runComparison <- function(dat, sn, year, cid){
   }
   return(g)
 }
+
+
+runComparison(dat, "JMDC", 2009, 312664)
+
 
