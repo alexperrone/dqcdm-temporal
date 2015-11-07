@@ -101,7 +101,7 @@ public class CohortAnalysisTask {
 	}
 
 	/**
-	 * @param cohortDefinitionId the cohortDefinitionId to set
+	 * @param cohortDefinitionIds the cohortDefinitionId to set
 	 */
 	public void setCohortDefinitionIds(List<String> cohortDefinitionIds) {
 		this.cohortDefinitionIds = cohortDefinitionIds;
@@ -115,7 +115,7 @@ public class CohortAnalysisTask {
 	}
 
 	/**
-	 * @param analysisId the analysisId to set
+	 * @param analysisIds the analysisId to set
 	 */
 	public void setAnalysisIds(List<String> analysisIds) {
 		this.analysisIds = analysisIds;
