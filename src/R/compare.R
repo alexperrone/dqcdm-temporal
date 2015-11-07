@@ -70,7 +70,3 @@ runComparison <- function(dat, sn, year, cid){
   print(g)
 }
 
-# An example. 
-plot1 <- runComparison(dat, "JMDC", 2011, 312664)
-plot1
-

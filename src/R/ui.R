@@ -1,6 +1,4 @@
 library(shiny)
-require(shiny)
-
 
 shinyUI(fluidPage(
   titlePanel("Anomaly Detective!"),
@@ -18,7 +16,7 @@ shinyUI(fluidPage(
       ),
     mainPanel(
       tabsetPanel(type="tab",
-                  tabPanel("AD",plotOutput("myplot", height = 600))
+                  tabPanel("AD",plotOutput("mainplot", height = 600))
                   )
       
     )
