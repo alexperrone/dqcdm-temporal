@@ -3,11 +3,7 @@
 library("data.table")
 library("lubridate")
 library("magrittr")
-library("testhat")
-
-# Read in the data. 
-source("src/R/read.R")
-source("src/R/sharedFuns.R")
+library("testthat")
 
 
 # Function to compare a single year in a database for a condition to all other years. 
@@ -48,6 +44,7 @@ plotComparison <- function(res){
     geom_line(data=res, aes(x=month, y=prevalence_control)) + 
     geom_line(data=res, aes(x=month, y=prevalence_control + upper), linetype=9) +
     geom_line(data=res, aes(x=month, y=prevalence_control - lower), linetype=9)
+  return(g)
 }
 
 plotCondition <- function(cid){
@@ -57,6 +54,7 @@ plotCondition <- function(cid){
     geom_point() + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
     labs(title="Influenza by Database")
+  return(g)
 }
 
 runComparison <- function(dat, sn, year, cid){
@@ -67,6 +65,6 @@ runComparison <- function(dat, sn, year, cid){
     res <- computeFlags(res$dat_year, res$dat_control_mean)
     g <- plotComparison(res)
   }
-  print(g)
+  return(g)
 }
 

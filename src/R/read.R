@@ -3,7 +3,7 @@ library("lubridate")
 library("magrittr")
 
 # Read in the data. 
-dat <- fread("data/dqcdm-temporal-summary/dqcdm_temporal_summary_subset_2.txt")
+dat <- fread("../../data/dqcdm-temporal-summary/dqcdm_temporal_summary_subset_2.txt")
 
 # Light munging. 
 dat[ , prevalence := as.double(prevalence)]
