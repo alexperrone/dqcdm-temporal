@@ -15,15 +15,15 @@ dqdatat <- dcast(dqdatam, source_name + concept_id + concept_name + time_period_
 concepts <- as.data.frame(table(dqdata$concept_id))
 sources <- as.data.frame(table(dqdata$source_name))
 
+analyses <- unique(dqdata[c("concept_id","source_name")])
+
 
 # loop through all databases, all concepts
-for(conceptId in  concepts[,1])
+for(i in 1:nrow(analyses))
 {
-  
-  for(sourceName in sources[,1])
-  {  
-    
-    dqdata1 <- subset(dqdata, source_name == sourceName & concept_id==conceptId, select=c(prevalence,time_period_year,time_period_month))
+      dqdata1 <- subset(dqdata, source_name == analyses[i,]$source_name & concept_id==analyses[i,]$concept_id, select=c(prevalence,time_period_year,time_period_month,time_period))
+      dqdata1 <- dqdata1[order(dqdata1$time_period),]
+      
     first_year <- as.numeric(dqdata1[1,]$time_period_year)
     first_month <- as.numeric(dqdata1[1,]$time_period_month)
     last_year <- as.numeric(dqdata1[nrow(dqdata1),]$time_period_year)
@@ -46,7 +46,6 @@ for(conceptId in  concepts[,1])
     lines(ts(fit2$coef[1]+fit2$coef[2]*(1:n)+mean(fit2$coef[-(1:2)]),
              start=start(ts),f=12),col="red")
 
-    tsoutliers(ts)
     
     #data quality checks
     #fit lr to trend data,  is abs(beta) large AND significant?
@@ -55,7 +54,6 @@ for(conceptId in  concepts[,1])
     
     #look for any outlier values in remainder...
     #max(abs(remainder))
-  }
 
 }
 
