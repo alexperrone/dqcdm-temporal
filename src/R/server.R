@@ -39,8 +39,8 @@ shinyServer(
         control_dat <- rbindlist(list(control_dat, cdat), use.names=TRUE, fill=TRUE)
       }
       # Rename variables.
-      control_dat[ , upper := prevalence + se]
-      control_dat[ , lower := prevalence - se]
+      control_dat[ , upper := prevalence + input$multse * se]
+      control_dat[ , lower := prevalence - input$multse * se]
       setnames(control_dat, "prevalence", "control_prevalence")
       setnames(control_dat, "control_year", "year")
       setnames(control_dat, "N", "num_data_points")
@@ -99,13 +99,21 @@ shinyServer(
     })
     
     output$table <- renderPrint({
-      table_subset <- subset(control_dat(), flag==TRUE, select=c("year", "month", "source_name", 
-                                                                 "concept_name", "prevalence", 
+      concept_name <- dat_db_cond()$concept_name[1]
+      source_name <- dat_db_cond()$source_name[1]
+      print(concept_name)
+      print(source_name)
+      table_subset <- subset(control_dat(), flag==TRUE, select=c("year", "month", 
+                                                                 "prevalence", 
                                                                  "control_prevalence", "se"))
       table_subset[ , deviation := abs(prevalence - control_prevalence) / se]
       table_subset <- table_subset[(order(-deviation))]
       table_subset
     })
+    
+#     output$tabletitle <- renderText({
+#       concept_name <- dat_db_cond()$concept_name[1]
+#     })
     
     output$tsplot <- renderPlot({
       first_year <- dat_db_cond()[ , min(year)]
@@ -133,6 +141,19 @@ shinyServer(
         theme_alex
       grid.arrange(ts_vars, breakpoint, nrow=2, 
                    heights=c(4, 1))
+    })
+    
+    output$condplot <- renderPlot({
+      sub <- dat[dat$concept_id == input$Cond, ]
+      concept_name <- sub[1, ]$concept_name
+      p <- ggplot(sub, aes(x = time_period, y = prevalence)) + 
+        geom_point() + 
+        facet_wrap( ~ source_name, ncol=2) +
+        ggtitle(paste(concept_name, "by Database Source")) + 
+        xlab("Time") + 
+        ylab("Prevalence") + 
+        theme_alex
+      p
     })
     
   }
