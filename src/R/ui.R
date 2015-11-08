@@ -7,9 +7,9 @@ shinyUI(fluidPage(
       numericInput("Cond", "Enter Concept ID", 312664),
       br(),
       br(),
-      selectInput("DB", "Select Database", choices=c("JMDC" = "JMDC", "CPRD" = "CPRD", 
-                                                     "Optum" = "Optum", "Truven CCAE" = "Truven CCAE", 
-                                                     "Truven MDCD" = "Truven MDCD", 
+      selectInput("DB", "Select Database", choices=c("JMDC" = "JMDC", "CPRD" = "CPRD",
+                                                     "Optum" = "Optum", "Truven CCAE" = "Truven CCAE",
+                                                     "Truven MDCD" = "Truven MDCD",
                                                      "Truven MDCR" = "Truven MDCR"),
                   multiple = F ),
       br(),
@@ -19,12 +19,12 @@ shinyUI(fluidPage(
       ),
     mainPanel(
       tabsetPanel(type="tab",
-                  tabPanel("Year against Typical Year",plotOutput("mainplot", height = 1200)), 
+                  tabPanel("Year against Typical Year",plotOutput("mainplot", height = 1200)),
                   tabPanel("Table Preview", verbatimTextOutput("table")),
-                  tabPanel("Time Series Analysis", plotOutput("tsplot", height = 1200)), 
-                  tabPanel("Concept by Database",plotOutput("condplot", height = 1200))
+                  tabPanel("Time Series Analysis", plotOutput("tsplot", height = 1200)),
+                  tabPanel("Concept by Database",plotOutput("condplot", height = 500))
                   )
-      
+
     )
   )
 ))
