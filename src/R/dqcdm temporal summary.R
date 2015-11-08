@@ -125,7 +125,7 @@ for(i in 1:100)#nrow(analyses))
     if(length(struc$breakpoints)>=1)
     {
       vlines <- data.frame(xint=as.numeric(dqdata1[struc$breakpoints,"time_period_date"]))
-      p<-ggplot(data=dqdata1,aes(x=time_period_date, y=PREVALENCE))+geom_point()+geom_vline(data=vlines, aes(xintercept=xint,colour="red"), linetype = "dashed")
+      p<-ggplot(data=dqdata1,aes(x=time_period_date, y=PREVALENCE)) +geom_point()+geom_vline(data=vlines, aes(xintercept=xint,colour="red"), linetype = "dashed")
       ggsave(filename = paste(resultsFolder,"/breakpoints.jpg",sep=""), plot=p) 
     }
   

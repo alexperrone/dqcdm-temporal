@@ -108,8 +108,12 @@ shinyServer(
                                                                  "control_prevalence", "se"))
       table_subset[ , deviation := abs(prevalence - control_prevalence) / se]
       table_subset <- table_subset[(order(-deviation))]
+      table_subset[ , control_prevalence := round(control_prevalence, 3)]
+      table_subset[ , prevalence := round(prevalence, 3)]
+      table_subset[ , se := round(se, 3)]
+      table_subset[ , deviation := round(deviation, 3)]
       table_subset
-    })
+    }, width=1000)
 
 #     output$tabletitle <- renderText({
 #       concept_name <- dat_db_cond()$concept_name[1]
@@ -125,22 +129,53 @@ shinyServer(
       ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month),
                end=c(last_year, last_month), frequency=12)
       stl <- stl(ts, s.window="periodic")
-      #       plot(stl, main=paste0("Seasonal Decomposition for:",
-      #                             input$Cond, sep="\n"),
-      #            col.range="blue")
-      ts_vars <- autoplot(stl, ts.colour = 'blue')
-      ts_vars <- ts_vars +
+      ts_vars <- autoplot(stl, ts.colour = 'blue') +
         labs(title=paste("Seasonal Decomposition for:",
                           dat_db_cond()$concept_name[1], sep="\n")) +
         theme_alex
 
+      # Plot manually.
+      ts_dt <- as.data.table(cbind(Year = floor(time(stl$time.series) + .01),
+                                   Month = cycle(stl$time.series), stl$time.series))
+      ts_dt[ , time_period := ymd(paste0(Year, sprintf("%02d", Month), "01"))]
+      setnames(ts_dt, c("stl$time.series.seasonal", "stl$time.series.trend",
+               "stl$time.series.remainder"),
+               c("seasonal", "trend", "remainder"))
+      seasonal_plot <- ggplot(ts_dt, aes(x=time_period, y=seasonal)) +
+        geom_line(color="dodgerblue", size=1.5) +
+        labs(title="Seasonal")  +
+        ylab("Seasonal Prevalence") + xlab("Time") +
+        theme_alex
+      trend_plot <- ggplot(ts_dt, aes(x=time_period, y=trend)) +
+        geom_line(color="dodgerblue", size=1.5) +
+        stat_smooth(method="lm", color="black", linetype=9) +
+        labs(title="Trend") +
+        ylab("Trend Prevalence") + xlab("Time") +
+        theme_alex
+      remainder_plot <- ggplot(ts_dt, aes(x=time_period, y=remainder)) +
+        geom_line(color="dodgerblue", size=1.5) +
+        labs(title="Remainder") +
+        ylab("Remainder Prevalence") + xlab("Time") +
+        theme_alex
+
+      # Breakpoint plot.
+      struc <- breakpoints(ts ~ 1)
+      if(length(struc$breakpoints)>=1)
+      {
+        vlines <- data.frame(xint=as.numeric(dat_db_cond()[struc$breakpoints, time_period]))
+        struc_plot <- ggplot(data=dat_db_cond(),aes(x=time_period, y=prevalence)) +
+          geom_point() +
+          geom_line() +
+          geom_vline(data=vlines, aes(xintercept=xint, colour="red"), linetype = "dashed")
+      }
+
       # Time series trend plot.
       breakpoint <- autoplot(cpt.meanvar(ts)) +
-        labs(title=paste("Change Points for:",
+        labs(title=paste("Data and Break Points for:",
                          dat_db_cond()$concept_name[1], sep="\n")) +
         theme_alex
-      grid.arrange(ts_vars, breakpoint, nrow=2,
-                   heights=c(4, 1))
+      grid.arrange(breakpoint, seasonal_plot, trend_plot, remainder_plot,
+                   nrow=5)
     })
 
     output$condplot <- renderPlot({
