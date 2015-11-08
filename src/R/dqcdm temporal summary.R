@@ -39,8 +39,7 @@ for(i in 1:nrow(analyses))
     
     dir.create(resultsFolder)
   }
-  
-  i<-3
+
     dqdata1 <- subset(dqdata, source_name == analyses[i,]$source_name & concept_id==analyses[i,]$concept_id, select=c(prevalence,time_period_year,time_period_month,time_period, time_period_date))
       dqdata1 <- dqdata1[order(dqdata1$time_period),]
       
@@ -53,42 +52,45 @@ for(i in 1:nrow(analyses))
     ts <- ts(dqdata1[,1], start=c(first_year, first_month), end=c(last_year, last_month), frequency=12)
     
     stl<- stl(ts,s.window="periodic")
-    plot(stl)
-    trend <- stl$time.series[,"trend"]
-    seasonal <- stl$time.series[,"seasonal"]
-    remainder <- stl$time.series[,"remainder"]
     
-   
+  jpeg(file=paste(resultsFolder,"/stl.jpg",sep=""))
+    plot(stl)
+  dev.off()
+     
     #data quality checks
     #fit lr to trend data,  is abs(beta) large AND significant?
     
     lmfit <- tslm(ts ~ trend + season)
     lmfitsum <-summary(lmfit)
-    analyses[i,]$temporalslope <- lmfit$coef[2]
-    analyses[i,]$temporalslopesig <- lmfitsum$coef[2,4]
+    analyses[i,"temporalslope"] <- lmfit$coef[2]
+    analyses[i,"temporalslopesig"] <- lmfitsum$coef[2,4]
   
 
     n <- length(ts)
+    jpeg(file=paste(resultsFolder,"/lineartrend.jpg",sep=""))
     plot(ts)
     lines(ts(lmfit$coef[1]+lmfit$coef[2]*(1:n)+mean(lmfit$coef[-(1:2)]),
              start=start(ts),f=12),col="red")
-
-    
+    dev.off()    
    
     
     
     #look for any outlier values in remainder...
-  
-    dqoutliers <- tso(ts)
-    jpeg(file=paste(resultsFolder,"/dqoutliers.jpg",sep=""))
-    plot(dqoutliers)
-    dev.off()
-    analyses[i,]$numoutliers <- nrow(dqoutliers$outliers)
-  
-  
+
+# this is the right way to do it, but its just too damn slow....
+#     dqoutliers <- tso(ts)
+#     jpeg(file=paste(resultsFolder,"/dqoutliers.jpg",sep=""))
+#     plot(dqoutliers)
+#     dev.off()
+#     analyses[i,"numoutliers"] <- nrow(dqoutliers$outliers)
+
+  stl2<- stl(ts,s.window="periodic",robust="TRUE")
+  analyses[i,"numoutliers"] <- sum(stl2$weights < 1e-8)
+
     struc<-breakpoints(ts~1)
-  
-    analyses[i,]$numbreakpoints <- length(struc$breakpoints)
-  
+    analyses[i,"numbreakpoints"] <- length(struc$breakpoints)
+    vlines <- data.frame(xint=as.numeric(dqdata1[struc$breakpoints,"time_period_date"]))
+    p<-ggplot(data=dqdata1,aes(x=time_period_date, y=prevalence))+geom_point()+geom_vline(data=vlines, aes(xintercept=xint,colour="red"), linetype = "dashed")
+    ggsave(filename = paste(resultsFolder,"/breakpoints.jpg",sep=""), plot=p) 
 }
 
