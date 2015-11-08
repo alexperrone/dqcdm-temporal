@@ -120,14 +120,29 @@ shinyServer(
 #     })
 
     output$tsplot <- renderPlot({
+      # Time period. 
+      first_time_period <- dat_db_cond()[ , min(time_period)]
+      last_time_period <- dat_db_cond()[ , max(time_period)]
+      # Year. 
       first_year <- dat_db_cond()[ , min(year)]
-      first_month <- dat_db_cond()[ , min(month)]
       last_year <- dat_db_cond()[ , max(year)]
+      # Month. 
+      first_month <- dat_db_cond()[ , min(month)]
       last_month <- dat_db_cond()[ , max(month)]
+      
+      
 
+      # Handle the zeros in time-series. 
+      fulldateseq <- data.frame(time_period=seq(from=first_time_period, 
+                                                to=last_time_period, by='month'))
+      fullprev <- merge(fulldateseq, dat_db_cond(), by="time_period", all=TRUE)
+      fullprev$prevalence[is.na(fullprev$prevalence)] <- 0
+      
       #figure out how this handles nulls and maybe put the 0s in
-      ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month),
-               end=c(last_year, last_month), frequency=12)
+      ts <- ts(fullprev$prevalence, start=c(first_year, first_month), end=c(last_year, last_month),
+               frequency=12)
+#       ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month),
+#                end=c(last_year, last_month), frequency=12)  # original: no padding with 0's
       stl <- stl(ts, s.window="periodic")
       ts_vars <- autoplot(stl, ts.colour = 'blue') +
         labs(title=paste("Seasonal Decomposition for:",
@@ -160,10 +175,11 @@ shinyServer(
 
       # Breakpoint plot.
       struc <- breakpoints(ts ~ 1)
+      fullprev <- data.table(fullprev)
       if(length(struc$breakpoints)>=1)
       {
-        vlines <- data.frame(xint=as.numeric(dat_db_cond()[struc$breakpoints, time_period]))
-        struc_plot <- ggplot(data=dat_db_cond(),aes(x=time_period, y=prevalence)) +
+        vlines <- data.frame(xint=as.numeric(fullprev[struc$breakpoints, time_period]))
+        struc_plot <- ggplot(data=dat_db_cond(), aes(x=time_period, y=prevalence)) +
           geom_point() +
           geom_line() +
           geom_vline(data=vlines, aes(xintercept=xint, colour="red"), linetype = "dashed")
