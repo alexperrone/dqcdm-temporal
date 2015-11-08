@@ -15,7 +15,7 @@ define(['knockout', 'text!./webapi-configuration.html'], function (ko, view) {
                     self.model.currentSummaryStats(results);
 				},
 				error: function (xhr, message) {
-					alert('Could not find ' + service.url + 'summary.json');
+					//alert('Could not find ' + service.url + 'summary.json');
 				}
 			});
 		}

@@ -1,5 +1,6 @@
 requirejs.config({
 	baseUrl: 'js',
+    waitSeconds: 200,
     packages: [
 		{
 		    name: "databindings",

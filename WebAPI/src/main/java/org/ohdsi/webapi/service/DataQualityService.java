@@ -63,6 +63,37 @@ public class DataQualityService extends AbstractDaoService {
   }    
 
   @GET
+  @Path("{sourceName}/search/{searchTerm}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Collection<DataQualityRecord> searchConcepts(@PathParam("sourceKey") String sourceKey, @PathParam("sourceName") String sourceName, @PathParam("searchTerm") String searchTerm) {
+    try {
+      Source source = getSourceRepository().findBySourceKey(sourceKey);
+      String tableQualifier = source.getTableQualifier(SourceDaimon.DaimonType.Results);
+
+      String sql_statement = ResourceHelper.GetResourceAsString("/resources/dataquality/sql/searchDataQualityByConceptName.sql");
+      sql_statement = SqlRender.renderSql(sql_statement, new String[]{"results_schema", "sourceName", "searchTerm"}, new String[]{tableQualifier, sourceName, searchTerm});
+      sql_statement = SqlTranslate.translateSql(sql_statement, "sql server", source.getSourceDialect());
+      
+      final List<DataQualityRecord> results = new ArrayList<DataQualityRecord>();
+
+        List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+
+        for (Map rs : rows) {
+          DataQualityRecord info = new DataQualityRecord();
+          info.conceptId = (String) rs.get("concept_id");
+          info.conceptName = (String) rs.get("concept_name");
+          info.domainId = (String) rs.get("domain_id");
+          results.add(info);
+        }
+        return results;
+    }
+    catch(Exception ex) {
+        throw ex;
+    }
+      
+  }
+  
+  @GET
   @Path("info")
   @Produces(MediaType.APPLICATION_JSON)
   public String getInfo() {
