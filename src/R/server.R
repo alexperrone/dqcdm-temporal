@@ -1,6 +1,10 @@
 library("shiny")
 library("gridExtra")
 library("ggplot2")
+library("ggfortify")
+library("forecast")
+library("changepoint")
+library("strucchange")
 
 # Read in the data. 
 source("sharedFuns.R")
@@ -12,7 +16,7 @@ shinyServer(
     dat_db_cond <- reactive({
       subset(dat, source_name==input$DB & concept_id==input$Cond)
     })
-  
+    
     # Compute average year. 
     avg_year <- reactive({
       ddc <- subset(dat, source_name==input$DB & concept_id==input$Cond)
@@ -102,5 +106,34 @@ shinyServer(
       table_subset <- table_subset[(order(-deviation))]
       table_subset
     })
+    
+    output$tsplot <- renderPlot({
+      first_year <- dat_db_cond()[ , min(year)]
+      first_month <- dat_db_cond()[ , min(month)]
+      last_year <- dat_db_cond()[ , max(year)]
+      last_month <- dat_db_cond()[ , max(month)]
+      
+      #figure out how this handles nulls and maybe put the 0s in
+      ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month), 
+               end=c(last_year, last_month), frequency=12)
+      stl <- stl(ts, s.window="periodic")
+      #       plot(stl, main=paste0("Seasonal Decomposition for:", 
+      #                             input$Cond, sep="\n"), 
+      #            col.range="blue")
+      ts_vars <- autoplot(stl, ts.colour = 'blue')
+      ts_vars <- ts_vars + 
+        labs(title=paste("Seasonal Decomposition for:", 
+                          dat_db_cond()$concept_name[1], sep="\n")) + 
+        theme_alex
+      
+      # Time series trend plot. 
+      breakpoint <- autoplot(cpt.meanvar(ts)) + 
+        labs(title=paste("Change Points for:", 
+                         dat_db_cond()$concept_name[1], sep="\n")) + 
+        theme_alex
+      grid.arrange(ts_vars, breakpoint, nrow=2, 
+                   heights=c(4, 1))
+    })
+    
   }
 )

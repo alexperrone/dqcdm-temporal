@@ -16,8 +16,9 @@ shinyUI(fluidPage(
       ),
     mainPanel(
       tabsetPanel(type="tab",
-                  tabPanel("Year against Typical Year",plotOutput("mainplot", height = 600)), 
-                  tabPanel("Table Preview", verbatimTextOutput("table"))
+                  tabPanel("Year against Typical Year",plotOutput("mainplot", height = 1200)), 
+                  tabPanel("Table Preview", verbatimTextOutput("table")),
+                  tabPanel("Time Series Analysis", plotOutput("tsplot", height = 1200)) 
                   )
       
     )
