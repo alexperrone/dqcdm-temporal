@@ -4,7 +4,8 @@ library("magrittr")
 
 # Read in the data. 
 dat <- fread("../../data/dqcdm-temporal-summary/dqcdm_temporal_summary_subset_2.txt")
-
+analyses <- fread("../../data/dqcdm-temporal-summary/dqcdm_analyses.csv")
+  
 # Light munging. 
 dat[ , prevalence := as.double(prevalence)]
 dat[ , time_period := paste0(time_period, "01")]
