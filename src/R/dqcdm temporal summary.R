@@ -4,10 +4,15 @@ library(lubridate)
 library(reshape)
 library(reshape2)
 library(forecast)
+library(tsoutliers)
+library(strucchange)
+library(ggplot2)
+library(jpeg)
 
 dqdata <- read.xlsx("C:/Documents/OHDSI/DQCDM/dqcdm_temporal_summary.xlsx",1)
 dqdata$time_period_year <- substr(dqdata$time_period, 1, nchar(dqdata$time_period)-2)
 dqdata$time_period_month <- substr(dqdata$time_period, 5, nchar(dqdata$time_period))
+dqdata$time_period_date <- ymd(paste0(dqdata$time_period,"01"))
 
 dqdatam <- melt(dqdata,id.vars=c("source_name","concept_id","concept_name","domain_id","time_period_year","measure_id","time_period","time_period_month"))
 dqdatat <- dcast(dqdatam, source_name + concept_id + concept_name + time_period_year ~ time_period_month)
@@ -21,7 +26,22 @@ analyses <- unique(dqdata[c("concept_id","source_name")])
 # loop through all databases, all concepts
 for(i in 1:nrow(analyses))
 {
-      dqdata1 <- subset(dqdata, source_name == analyses[i,]$source_name & concept_id==analyses[i,]$concept_id, select=c(prevalence,time_period_year,time_period_month,time_period))
+  sourceFolder <-  paste("C:/Documents/OHDSI/DQCDM/",analyses[i,]$source_name,sep="")
+  if (!file.exists(sourceFolder))
+  {
+    
+    dir.create(sourceFolder)
+  }
+  
+  resultsFolder <- paste("C:/Documents/OHDSI/DQCDM/",analyses[i,]$source_name,"/",analyses[i,]$concept_id,sep="")
+  if (!file.exists(resultsFolder))
+  {
+    
+    dir.create(resultsFolder)
+  }
+  
+  i<-3
+    dqdata1 <- subset(dqdata, source_name == analyses[i,]$source_name & concept_id==analyses[i,]$concept_id, select=c(prevalence,time_period_year,time_period_month,time_period, time_period_date))
       dqdata1 <- dqdata1[order(dqdata1$time_period),]
       
     first_year <- as.numeric(dqdata1[1,]$time_period_year)
@@ -34,26 +54,41 @@ for(i in 1:nrow(analyses))
     
     stl<- stl(ts,s.window="periodic")
     plot(stl)
-    a<-summary(stl)
     trend <- stl$time.series[,"trend"]
     seasonal <- stl$time.series[,"seasonal"]
     remainder <- stl$time.series[,"remainder"]
     
-    
-    fit2 <- tslm(ts ~ trend + season)
-    n <- length(ts)
-    plot(ts)
-    lines(ts(fit2$coef[1]+fit2$coef[2]*(1:n)+mean(fit2$coef[-(1:2)]),
-             start=start(ts),f=12),col="red")
-
-    
+   
     #data quality checks
     #fit lr to trend data,  is abs(beta) large AND significant?
     
+    lmfit <- tslm(ts ~ trend + season)
+    lmfitsum <-summary(lmfit)
+    analyses[i,]$temporalslope <- lmfit$coef[2]
+    analyses[i,]$temporalslopesig <- lmfitsum$coef[2,4]
+  
+
+    n <- length(ts)
+    plot(ts)
+    lines(ts(lmfit$coef[1]+lmfit$coef[2]*(1:n)+mean(lmfit$coef[-(1:2)]),
+             start=start(ts),f=12),col="red")
+
+    
+   
     
     
     #look for any outlier values in remainder...
-    #max(abs(remainder))
-
+  
+    dqoutliers <- tso(ts)
+    jpeg(file=paste(resultsFolder,"/dqoutliers.jpg",sep=""))
+    plot(dqoutliers)
+    dev.off()
+    analyses[i,]$numoutliers <- nrow(dqoutliers$outliers)
+  
+  
+    struc<-breakpoints(ts~1)
+  
+    analyses[i,]$numbreakpoints <- length(struc$breakpoints)
+  
 }
 
