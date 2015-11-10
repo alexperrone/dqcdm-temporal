@@ -54,11 +54,12 @@ requirejs.config({
 		"lodash": "lodash.min",
         "knockout.dataTables.binding": "knockout.dataTables.binding",
         "home": "components/home",
-        "viewer": "components/viewer"
+        "viewer": "components/viewer",
+        "search": "components/search"
 	}
 });
 
-requirejs(['knockout', './app', 'director', 'home', 'viewer'], function(ko, app) {
+requirejs(['knockout', './app', 'director', 'home', 'search', 'viewer'], function(ko, app) {
     var pageModel = new app();
     var routerOptions = {
 		notfound: function () {
@@ -66,6 +67,7 @@ requirejs(['knockout', './app', 'director', 'home', 'viewer'], function(ko, app)
 		}
 	}
     var routes = {
+        '/search/:query:': pageModel.search,
         '/viewer/:conceptid:': pageModel.viewer,
 		'/viewer': function () {
 			pageModel.currentView('viewer');

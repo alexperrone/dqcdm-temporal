@@ -9,7 +9,7 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
                 url: 'http://localhost:8080/WebAPI/DQCDM/dq/' + self.model.currentService().sourceName + '/concept/' + self.model.currentConceptId(),
                 success: function (results) {
                     self.model.currentConceptName(results[0].conceptName);
-                    
+
                     var timePeriod = results.map(function (d, i) {
                         return d.timePeriod;
                     });
@@ -40,7 +40,7 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
                         xLabel: "Date",
                         yLabel: "Prevalence per 1000 People"
                     });
-                    
+
                     self.circularHeatMap(results);
                 },
                 error: function (xhr, message) {
@@ -262,8 +262,8 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
             var years = $.unique(results.map(function (d, i) {
                 return d.timePeriod.substring(2, 4);
             }));
-            
-            
+
+
             /*
             var chart = self.circularHeatChart()
                 .segmentHeight(20)
@@ -290,13 +290,13 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
                     bottom: 20,
                     left: 20
                 });
-            
+
             /* An array of objects */
             data = [];
             for (var i = 0; i < (years.length * 12); i++) {
-                    if (i > results.length - 1) {
-                            break;
-                    }
+                if (i > results.length - 1) {
+                    break;
+                }
                 data[i] = {
                     title: "Prevalence " + results[i].timePeriod,
                     value: results[i].prevalence * 100
@@ -304,11 +304,11 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
             }
 
             chart.accessor(function (d) {
-                    return d.value;
-                });
-            
+                return d.value;
+            });
+
             d3.select("#chart3 svg").remove();
-            
+
             d3.select('#chart3')
                 .selectAll('svg')
                 .data([data])
@@ -316,7 +316,7 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
                 .append('svg')
                 .attr("width", "100%")
                 .call(chart);
-            
+
 
             /* Add a mouseover event */
             d3.selectAll("#chart3 path").on('mouseover', function () {
@@ -328,10 +328,76 @@ define(['knockout', 'text!./viewer.html', 'd3', 'jnj_chart', 'colorbrewer', 'kno
             });
         }
 
-        self.loadData();
-        //self.circularHeatMap();
-        
-        self.model.currentService.subscribe(function(newValue) {
+        self.miniCircularHeatMap = function (results) {
+            // Get the data for the selected concept and current data source name
+            $.ajax({
+                url: 'http://localhost:8080/WebAPI/DQCDM/dq/concept/' + self.model.currentConceptId(),
+                success: function (results) {
+                    // Format the data for the chart
+                    var years = $.unique(results.map(function (d, i) {
+                        return d.timePeriod.substring(2, 4);
+                    }));
+
+                    var chart = self.circularHeatChart()
+                        .segmentHeight(20)
+                        .innerRadius(20)
+                        .numSegments(12)
+                        .margin({
+                            top: 20,
+                            right: 0,
+                            bottom: 20,
+                            left: 20
+                        });
+
+                    /* An array of objects */
+                    data = [];
+                    for (var ds = 0; ds < self.model.services.length; ds++) {
+                        var currentSourceName = self.model.services[ds].sourceName;
+                        data[ds] = []
+                            // Now get the data from the results for the selected data source
+                        var resultsDataForSource = results.map(function (d, i) {
+                            if (d.sourceName == currentSourceName) {
+                                return d;
+                            }
+                        });
+
+                        // Remove the NULL values from the subset
+                        var resultsDataForSourceNoNull = $.grep(resultsDataForSource, function (n, i) {
+                            return n != null
+                        });
+
+
+                        // Get the data from the data set
+                        for (var i = 0; i < resultsDataForSourceNoNull.length; i++) {
+                            data[ds][i] = resultsDataForSourceNoNull[i].prevalence * 100;
+                        }
+                    }
+
+                    d3.select("#chart2 svg").remove();
+
+                    chart.range(["white", "black"]).margin({
+                        top: 20,
+                        right: 20,
+                        bottom: 20,
+                        left: 20
+                    });
+                    d3.select('#chart2')
+                        .selectAll('svg')
+                        .data(data)
+                        .enter()
+                        .append('svg')
+                        .call(chart);
+                }
+            });
+        }
+
+        if (self.model.currentConceptId() != undefined && self.model.currentConceptId() > 0) {
+            self.loadData();
+            //self.circularHeatMap();
+            self.miniCircularHeatMap();            
+        }
+
+        self.model.currentService.subscribe(function (newValue) {
             self.loadData();
         })
     }

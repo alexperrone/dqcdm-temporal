@@ -41,6 +41,11 @@ body {
 #chart3 svg {
 	height: 760px;
 }
+
+#chart2 svg {
+    width="100%" 
+    viewBox="0 0 20 10"
+}
 /*
 path {
 	stroke: #777;
