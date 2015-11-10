@@ -1,9 +1,19 @@
 	<div class="container">
 		<div class="panel panel-default">
-			<div class="panel-heading" data-bind="text: 'Stats For ' + model.currentService().name">
+			<div class="panel-heading" data-bind="text: 'Data Source: ' + model.currentService().name + ' - Condition Prevalence by Month For ' + model.currentConceptName()">
 			</div>
 			<div class="panel-body">
-                Viewer
-			</div>            
-		</div>
+				<div class="drilldown" id="conditioneraPrevalenceByMonth"></div>
+		    </div>
+			<div class="panel-heading" data-bind="text: 'Data Source: ' + model.currentService().name + ' - Heat Map For ' + model.currentConceptName()">
+			</div>
+			<div class="panel-body">
+                 <div id="chart3"></div>
+			     <div id="info"></div>
+            </div>
+			<div class="panel-heading" data-bind="text: 'All Sources - Heat Map For ' + model.currentConceptName()">
+			</div>
+			<div class="panel-body">
+                 <div id="chart2"></div>
+            </div>
 	</div>

@@ -33,7 +33,7 @@ analyses <- querySql(connection,"select distinct source_name, concept_id from dq
 # loop through all databases, all concepts
 for(i in 1:100)#nrow(analyses))
 {
-
+  
   #i <- 1
   sourceFolder <-  paste("C:/Documents/OHDSI/DQCDM/",analyses[i,]$SOURCE_NAME,sep="")
   if (!file.exists(sourceFolder))
@@ -48,8 +48,8 @@ for(i in 1:100)#nrow(analyses))
     
     dir.create(resultsFolder)
   }
-
-
+  
+  
   getDataSql <- paste("select prevalence, time_period from dqcdm_temporal_summary where concept_id=",analyses[i,]$CONCEPT_ID, " and source_name='",analyses[i,]$SOURCE_NAME,"' order by time_period",sep="")
   dqdata1 <- querySql(connection,getDataSql)
   
@@ -60,27 +60,27 @@ for(i in 1:100)#nrow(analyses))
   
   #dqdata1 <- subset(dqdata, source_name == analyses[i,]$source_name & concept_id==, select=c(prevalence,time_period_year,time_period_month,time_period, time_period_date))
   #    dqdata1 <- dqdata1[order(dqdata1$time_period),]
-      
-    first_year <- as.numeric(dqdata1[1,]$time_period_year)
-    first_month <- as.numeric(dqdata1[1,]$time_period_month)
-    last_year <- as.numeric(dqdata1[nrow(dqdata1),]$time_period_year)
-    last_month <- as.numeric(dqdata1[nrow(dqdata1),]$time_period_month)
-    
+  
+  first_year <- as.numeric(dqdata1[1,]$time_period_year)
+  first_month <- as.numeric(dqdata1[1,]$time_period_month)
+  last_year <- as.numeric(dqdata1[nrow(dqdata1),]$time_period_year)
+  last_month <- as.numeric(dqdata1[nrow(dqdata1),]$time_period_month)
+  
   fulldateseq <- seq(from=ymd(paste0(dqdata1[1,]$TIME_PERIOD,"01")), to=ymd(paste0(dqdata1[nrow(dqdata1),]$TIME_PERIOD,"01")), by='month')
   fullprev <- data.frame(Date=fulldateseq, value=with(dqdata1, PREVALENCE[match(fulldateseq, dqdata1$time_period_date)]))
   fullprev[is.na(fullprev)] <- 0
   
-    #figure out how this handles nulls and maybe put the 0s in
-    ts <- ts(fullprev[,2], start=c(first_year, first_month), end=c(last_year, last_month), frequency=12)
+  #figure out how this handles nulls and maybe put the 0s in
+  ts <- ts(fullprev[,2], start=c(first_year, first_month), end=c(last_year, last_month), frequency=12)
   
-    if(length(ts)>24)#not enough data to make temporal pattern
-    {
-      stl<- stl(ts,s.window="periodic")
-      jpeg(file=paste(resultsFolder,"/stl.jpg",sep=""))
-        plot(stl)
-      dev.off() 
+  if(length(ts)>24)#not enough data to make temporal pattern
+  {
+    stl<- stl(ts,s.window="periodic")
+    jpeg(file=paste(resultsFolder,"/stl.jpg",sep=""))
+    plot(stl)
+    dev.off() 
     
-  
+    
     #data quality checks
     #fit lr to trend data,  is abs(beta) large AND significant?
     
@@ -88,7 +88,7 @@ for(i in 1:100)#nrow(analyses))
     lmfitsum <-summary(lmfit)
     analyses[i,"temporalslope"] <- lmfit$coef[2]
     analyses[i,"temporalslopesig"] <- lmfitsum$coef[2,4]
-  
+    
     
     
     seasonalfit <- ets(ts)
@@ -100,7 +100,7 @@ for(i in 1:100)#nrow(analyses))
     analyses[i,"seasonalsig"] <-1-pchisq(deviance,df)
     
     
-
+    
     n <- length(ts)
     jpeg(file=paste(resultsFolder,"/lineartrend.jpg",sep=""))
     plot(ts)
@@ -109,17 +109,17 @@ for(i in 1:100)#nrow(analyses))
     dev.off()    
     
     #look for any outlier values in remainder...
-
-# this is the right way to do it, but its just too damn slow....
-#     dqoutliers <- tso(ts)
-#     jpeg(file=paste(resultsFolder,"/dqoutliers.jpg",sep=""))
-#     plot(dqoutliers)
-#     dev.off()
-#     analyses[i,"numoutliers"] <- nrow(dqoutliers$outliers)
-
+    
+    # this is the right way to do it, but its just too damn slow....
+    #     dqoutliers <- tso(ts)
+    #     jpeg(file=paste(resultsFolder,"/dqoutliers.jpg",sep=""))
+    #     plot(dqoutliers)
+    #     dev.off()
+    #     analyses[i,"numoutliers"] <- nrow(dqoutliers$outliers)
+    
     stl2<- stl(ts,s.window="periodic",robust="TRUE")
     analyses[i,"numoutliers"] <- sum(stl2$weights < 1e-8)
-
+    
     struc<-breakpoints(ts~1)
     analyses[i,"numbreakpoints"] <- length(struc$breakpoints)
     if(length(struc$breakpoints)>=1)
@@ -128,11 +128,10 @@ for(i in 1:100)#nrow(analyses))
       p<-ggplot(data=dqdata1,aes(x=time_period_date, y=PREVALENCE)) +geom_point()+geom_vline(data=vlines, aes(xintercept=xint,colour="red"), linetype = "dashed")
       ggsave(filename = paste(resultsFolder,"/breakpoints.jpg",sep=""), plot=p) 
     }
-  
+    
   }
-
-
+  
+  
 }
 
 dummy <- dbDisconnect(connection)
-

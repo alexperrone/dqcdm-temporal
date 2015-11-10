@@ -12,11 +12,11 @@ source("read.R")
 
 shinyServer(
   function(input, output) {
-
+    
     dat_db_cond <- reactive({
       subset(dat, source_name==input$DB & concept_id==input$Cond)
     })
-
+    
     # Compute average year.
     avg_year <- reactive({
       ddc <- subset(dat, source_name==input$DB & concept_id==input$Cond)
@@ -25,7 +25,7 @@ shinyServer(
       avg_year[ , lower := prevalence - input$multse * se]
       avg_year
     })
-
+    
     # Compute control data: this is defined as the average year excluding the current
     # year.
     control_dat <- reactive({
@@ -52,7 +52,7 @@ shinyServer(
       # Fill in NAs.
       control_dat[ , source_name := unique(ddc$source_name)]
       control_dat[ , concept_name := unique(ddc$concept_name)]
-
+      
       # Compute flags on control data.
       control_dat[ , flag := prevalence > upper | prevalence < lower]
       control_dat[is.na(flag), flag := FALSE]
@@ -60,7 +60,7 @@ shinyServer(
       control_dat[ , flag_binary := ifelse(flag, 1, 0)]
       control_dat
     })
-
+    
     # Plot: Overview.
     output$mainplot <- renderPlot({
       overview_plot <- ggplot(dat_db_cond(), aes(x=time_period, y=prevalence)) +
@@ -97,7 +97,7 @@ shinyServer(
         theme_alex
       grid.arrange(overview_plot, facet_plot, avg_year_plot, nrow=3)
     })
-
+    
     output$table <- renderPrint({
       concept_name <- dat_db_cond()$concept_name[1]
       source_name <- dat_db_cond()$source_name[1]
@@ -114,11 +114,11 @@ shinyServer(
       table_subset[ , deviation := round(deviation, 3)]
       table_subset
     }, width=1000)
-
-#     output$tabletitle <- renderText({
-#       concept_name <- dat_db_cond()$concept_name[1]
-#     })
-
+    
+    #     output$tabletitle <- renderText({
+    #       concept_name <- dat_db_cond()$concept_name[1]
+    #     })
+    
     output$tsplot <- renderPlot({
       # Time period. 
       first_time_period <- dat_db_cond()[ , min(time_period)]
@@ -131,7 +131,7 @@ shinyServer(
       last_month <- dat_db_cond()[ , max(month)]
       
       
-
+      
       # Handle the zeros in time-series. 
       fulldateseq <- data.frame(time_period=seq(from=first_time_period, 
                                                 to=last_time_period, by='month'))
@@ -141,20 +141,20 @@ shinyServer(
       #figure out how this handles nulls and maybe put the 0s in
       ts <- ts(fullprev$prevalence, start=c(first_year, first_month), end=c(last_year, last_month),
                frequency=12)
-#       ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month),
-#                end=c(last_year, last_month), frequency=12)  # original: no padding with 0's
+      #       ts <- ts(dat_db_cond()$prevalence, start=c(first_year, first_month),
+      #                end=c(last_year, last_month), frequency=12)  # original: no padding with 0's
       stl <- stl(ts, s.window="periodic")
       ts_vars <- autoplot(stl, ts.colour = 'blue') +
         labs(title=paste("Seasonal Decomposition for:",
-                          dat_db_cond()$concept_name[1], sep="\n")) +
+                         dat_db_cond()$concept_name[1], sep="\n")) +
         theme_alex
-
+      
       # Plot manually.
       ts_dt <- as.data.table(cbind(Year = floor(time(stl$time.series) + .01),
                                    Month = cycle(stl$time.series), stl$time.series))
       ts_dt[ , time_period := ymd(paste0(Year, sprintf("%02d", Month), "01"))]
       setnames(ts_dt, c("stl$time.series.seasonal", "stl$time.series.trend",
-               "stl$time.series.remainder"),
+                        "stl$time.series.remainder"),
                c("seasonal", "trend", "remainder"))
       seasonal_plot <- ggplot(ts_dt, aes(x=time_period, y=seasonal)) +
         geom_line(color="dodgerblue", size=1.5) +
@@ -172,7 +172,7 @@ shinyServer(
         labs(title="Remainder") +
         ylab("Remainder Prevalence") + xlab("Time") +
         theme_alex
-
+      
       # Breakpoint plot.
       struc <- breakpoints(ts ~ 1)
       fullprev <- data.table(fullprev)
@@ -184,7 +184,7 @@ shinyServer(
           geom_line() +
           geom_vline(data=vlines, aes(xintercept=xint, colour="red"), linetype = "dashed")
       }
-
+      
       # Time series trend plot.
       breakpoint <- autoplot(cpt.meanvar(ts)) +
         labs(title=paste("Data and Break Points for:",
@@ -193,7 +193,7 @@ shinyServer(
       grid.arrange(breakpoint, seasonal_plot, trend_plot, remainder_plot,
                    nrow=5)
     })
-
+    
     output$condplot <- renderPlot({
       sub <- dat[dat$concept_id == input$Cond, ]
       concept_name <- sub[1, ]$concept_name
@@ -209,6 +209,6 @@ shinyServer(
         theme_alex
       p
     })
-
+    
   }
 )
