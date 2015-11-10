@@ -76,6 +76,8 @@ define([
         this.currentSearch = ko.observable();
         this.currentConceptId = ko.observable();
         this.currentConceptName = ko.observable();
+        self.recentSearch = ko.observableArray(null);
+        self.searchResultsConcepts = ko.observableArray();
 
         self.initComplete = function () {
             self.router.init('/');
@@ -105,6 +107,46 @@ define([
             self.currentView('viewer');
             self.currentConceptId(conceptid);
         }
+        
+		self.search = function (query) {
+			$.ajax({
+				url: 'http://localhost:8080/WebAPI/DQCDM/dq/search/' + query,
+				success: function (results) {
+                    var tempCaption;
+
+                    if (decodeURI(query).length > 20) {
+                        tempCaption = decodeURI(query).substring(0, 20) + '...';
+                    } else {
+                        tempCaption = decodeURI(query);
+                    }
+
+                    lastQuery = {
+                        query: query,
+                        caption: tempCaption,
+                        resultLength: results.length
+                    };
+                    self.currentSearch(query);
+
+                    var exists = false;
+                    for (var i = 0; i < self.recentSearch().length; i++) {
+                        if (self.recentSearch()[i].query == query)
+                            exists = true;
+                    }
+                    if (!exists) {
+                        self.recentSearch.unshift(lastQuery);
+                    }
+                    if (self.recentSearch().length > 7) {
+                        self.recentSearch.pop();
+                    }
+
+                    self.searchResultsConcepts(results);
+                    self.currentView('search');
+				},
+				error: function (xhr, message) {
+					alert('error while searching ' + message);
+				}
+			});
+		}         
 	}
 
 	return appModel;
