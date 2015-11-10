@@ -188,6 +188,7 @@ shinyServer(
         ggtitle(paste(concept_name, "by Database Source")) +
         xlab("Time") +
         ylab("Prevalence") +
+        labs(colour="Data Source") +
         xlim(ymd('20050101'), ymd('20141231')) +
         theme_alex
       p
