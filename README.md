@@ -5,7 +5,24 @@ date: "November 8, 2015"
 output: html_document
 ---
 
-This repository has collected different work from the Temporal Group. Most of the work is being presented in a Shiny app. For a selected condition (concept_id) and data source, the Shiny app presents results of different analyses in 4 tabs:
+## Installation
+
+
+This repository has collected different work from the Temporal Group. Most of the work is being presented in a Shiny app from R. After cloning the repository and installing R, you can install the required R packages as 
+follows: 
+
+```r
+install.packages(c("shiny", "ggplot2", "data.table", "lubridate", "magrittr", 
+                 "gridExtra", "ggfortify", "forecast", "changepoint", "strucchange"), 
+                 dependencies=TRUE)
+```
+
+Then you can run the app from within Rstudio by clicking Run App after opening either 
+`ui.R` or `server.R`. 
+
+## The app
+
+For a selected condition (concept_id) and data source, the Shiny app presents results of different analyses in 4 tabs:
 
 The 1st tab on the app overviews the data and calculates a "typical" annual pattern. It then highlights data points that statistically deviate from the "typical" pattern.
 
