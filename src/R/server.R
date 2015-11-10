@@ -21,8 +21,8 @@ shinyServer(
     avg_year <- reactive({
       ddc <- subset(dat, source_name==input$DB & concept_id==input$Cond)
       avg_year <- summarySE(ddc, measurevar="prevalence", groupvars="month", na.rm=TRUE)
-      avg_year[ , upper := prevalence + se]
-      avg_year[ , lower := prevalence - se]
+      avg_year[ , upper := prevalence + input$multse * se]
+      avg_year[ , lower := prevalence - input$multse * se]
       avg_year
     })
 

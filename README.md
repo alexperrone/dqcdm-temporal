@@ -8,7 +8,7 @@ output: html_document
 ## Installation
 
 
-This repository has collected different work from the Temporal Group. Most of the work is being presented in a Shiny app from R. After cloning the repository and installing R, you can install the required R packages as 
+This repository has collected different work from the Temporal Group. To run the Shiny app, you will need to install R, then from within R you can install the required R packages as 
 follows: 
 
 ```r
