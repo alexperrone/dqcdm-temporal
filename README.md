@@ -28,33 +28,16 @@ The 1st tab on the app overviews the data and calculates a "typical" annual patt
 
 ![tab 1](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-03.png)
 
-```{r}
-##the R code goes here
-```
+The second tab returns a table of high prevalence of the selected condition.
 
-The 2nd tab returns a table of high prevalence .....
-
-Picture goes below...
 ![tab 2](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-04.png)
 
-```{r}
-##the R code goes here
-```
-
-The 3rd tab produces plots from a set of time series analyses. 
+The third tab produces plots from a set of time series analyses. 
 
 Picture goes below...
 ![tab 3](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-07.png)
-
-```{r}
-##the R code goes here
-```
 
 The 4th tab plots prevelance overtime of the selected concept_id by database (for every database available).  
 
 Picture goes below...
 ![tab 4](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-08.png)
-
-```{r}
-##the R code goes here
-```
