@@ -24,7 +24,7 @@ Then you can run the app from within Rstudio by clicking Run App after opening e
 
 For a selected condition (concept_id) and data source, the Shiny app presents results of different analyses in 4 tabs:
 
-The 1st tab on the app overviews the data and calculates a "typical" annual pattern. It then highlights data points that statistically deviate from the "typical" pattern.
+The first tab on the app overviews the data and calculates a "typical" annual pattern. It then highlights data points that statistically deviate from the "typical" pattern.
 
 ![tab 1](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-03.png)
 
@@ -37,7 +37,6 @@ The third tab produces plots from a set of time series analyses.
 Picture goes below...
 ![tab 3](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-07.png)
 
-The 4th tab plots prevelance overtime of the selected concept_id by database (for every database available).  
+The fourth tab plots prevelance overtime of the selected concept_id by database (for every database available).  
 
-Picture goes below...
 ![tab 4](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-08.png)
