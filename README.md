@@ -24,9 +24,13 @@ Then you can run the app from within Rstudio by clicking Run App after opening e
 
 For a selected condition (concept_id) and data source, the Shiny app presents results of different analyses in 4 tabs:
 
-The first tab on the app overviews the data and calculates a "typical" annual pattern. It then highlights data points that statistically deviate from the "typical" pattern.
+The first tab on the app overviews the data and calculates a "typical" annual pattern. It highlights data points that statistically deviate from the "typical" pattern, defined as falling outside the error bounds given by the user-selected multiple of the standard error (SE) estimate. 
 
-![tab 1](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-03.png)
+![tab 1](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-11.png)
+
+We compute a "typical" year by averaging over each month over all of the data. The bounds are a multiple of the SE, which the user can select. For the condition below, we see a seasonality effect, with higher prevalence in the winter months. 
+
+![tab 1](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-10.png)
 
 The second tab returns a table of high prevalence of the selected condition.
 
@@ -39,4 +43,4 @@ Picture goes below...
 
 The fourth tab plots prevelance overtime of the selected concept_id by database (for every database available).  
 
-![tab 4](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-08.png)
+![tab 4](https://github.com/alexperrone/dqcdm-temporal/blob/master/img/screenshot-09.png)
