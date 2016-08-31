@@ -1,14 +1,14 @@
----
-title: "Temporal Anomaly Work"
-author: "Temporal Group!"
-date: "November 8, 2015"
-output: html_document
----
+Anomaly Detective 
+==========================
+
+This repository has collected different work from the Temporal Group from the DQ-CDM Code-a-thon Nov 6-8, 2015. 
+
+The Anomaly Detective provides an interactive app to explore temporal anomalies on top of DQ-CDM data. 
 
 ## Installation
 
 
-This repository has collected different work from the Temporal Group. To run the Shiny app, you will need to install R, then from within R you can install the required R packages as 
+To run the Shiny app, you will need to install R, then from within R you can install the required R packages as 
 follows: 
 
 ```r
